@@ -5,9 +5,7 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            Image(systemName: "iphone.radiowaves.left.and.right")
-                =font(.system(size: 60))
-                .foregroundColor(.blue)
+            
             
             Text("Hello, SwiftUI!")
                 .font(.largeTitle)
