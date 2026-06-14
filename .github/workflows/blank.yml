@@ -5,9 +5,15 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+
+      # THIS IS THE FIXED STEP: It unlocks the official iPhone library files
+      - name: Select Xcode Version
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
       - name: Compile Swift App
         run: |
           swiftc -target arm64-apple-ios15.0 "Sources/First App/First_App.swift" -o MyApp.ipa
+
       - name: Upload App Asset
         uses: actions/upload-artifact@v4
         with:
