@@ -1,0 +1,17 @@
+{
+  "name": "My Custom Apps",
+  "identifier": "com.cooldude1259.source",
+  "apps": [
+    {
+      "name": "MyFirstApp",
+      "bundleIdentifier": "com.cooldude1259.myfirstapp",
+      "developerName": "Your Name",
+      "version": "1.0",
+      "versionDate": "2026-06-14",
+      "versionDescription": "Initial SwiftUI release!",
+      "downloadURL": "https://github.com",
+      "localizedDescription": "My awesome custom SwiftUI app built natively from Windows.",
+      "iconURL": "https://githubusercontent.com"
+    }
+  ]
+}
