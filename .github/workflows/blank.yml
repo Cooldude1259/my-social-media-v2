@@ -1,4 +1,4 @@
-name: Build iOS Swift App
+name: Build iOS SwiftUI App
 on: [push]
 jobs:
   build:
@@ -9,18 +9,23 @@ jobs:
       - name: Select Xcode Version
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
-      - name: Create Native iOS App Bundle
+      - name: Compile and Package SwiftUI App
         run: |
-          # 1. Create the official iOS App structure
+          # 1. Recreate the clean iOS App Folder
+          rm -rf MyApp.app Payload MyApp.ipa
           mkdir -p MyApp.app
           
-          # 2. Compile Swift code using the official iPhone simulator/device SDK
-          swiftc -target arm64-apple-ios15.0 -sdk $(xcrun --sdk iphoneos --show-sdk-path) "Sources/First_App.swift" -o MyApp.app/MyApp
+          # 2. Compile ALL your SwiftUI files together using the native Apple iOS framework flags
+          swiftc -target arm64-apple-ios15.0 \
+                 -sdk $(xcrun --sdk iphoneos --show-sdk-path) \
+                 -Xfrontend -serialize-debugging-options \
+                 Sources/AppEntry.swift Sources/ContentView.swift \
+                 -o MyApp.app/MyApp
           
-          # 3. Copy your app configurations into the bundle
+          # 3. Inject configuration details
           cp Info.plist MyApp.app/
           
-          # 4. Package it into a Payload folder so AltStore recognizes it as an installer
+          # 4. Pack the structural contents for AltStore
           mkdir Payload
           cp -r MyApp.app Payload/
           zip -r MyApp.ipa Payload
