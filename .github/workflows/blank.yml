@@ -6,13 +6,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # THIS IS THE FIXED STEP: It unlocks the official iPhone library files
       - name: Select Xcode Version
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
-      - name: Compile Swift App
+      - name: Create Native iOS App Bundle
         run: |
-          swiftc -target arm64-apple-ios15.0 "Sources/First App/First_App.swift" -o MyApp.ipa
+          # 1. Create the official iOS App structure
+          mkdir -p MyApp.app
+          
+          # 2. Compile Swift code using the official iPhone simulator/device SDK
+          swiftc -target arm64-apple-ios15.0 -sdk $(xcrun --sdk iphoneos --show-sdk-path) "Sources/First_App.swift" -o MyApp.app/MyApp
+          
+          # 3. Copy your app configurations into the bundle
+          cp Info.plist MyApp.app/
+          
+          # 4. Package it into a Payload folder so AltStore recognizes it as an installer
+          mkdir Payload
+          cp -r MyApp.app Payload/
+          zip -r MyApp.ipa Payload
 
       - name: Upload App Asset
         uses: actions/upload-artifact@v4
