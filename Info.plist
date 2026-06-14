@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleExecutable</key>
-    <string>MyApp</string>
+    <string>MySocialMedia</string>
     <key>CFBundleIdentifier</key>
-    <string>com.cooldude1259.myfirstapp</string>
+    <string>com.cooldude1259.mysocialmedia</string>
     <key>CFBundleName</key>
-    <string>MyFirstApp</string>
+    <string>MySocialMedia</string>
     <key>CFBundleShortVersionString</key>
     <string>1.0</string>
     <key>CFBundleVersion</key>
