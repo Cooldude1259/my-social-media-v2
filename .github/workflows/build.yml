@@ -1,37 +1,49 @@
 name: Build iOS SwiftUI App
-on: [push]
+
+on:
+  push:
+    branches: [ main ]
+
+# Grants permissions to create a GitHub Release and upload the .ipa installer file
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Select Xcode Version
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
       - name: Compile and Package SwiftUI App
         run: |
-          # 1. Recreate the clean iOS App Folder
+          # 1. Clean up any previous builds and create a fresh App Bundle structure
           rm -rf MyApp.app Payload MyApp.ipa
           mkdir -p MyApp.app
           
-          # 2. Compile ALL your SwiftUI files together using the native Apple iOS framework flags
+          # 2. Compile your SwiftUI project files using the official iPhone SDK
           swiftc -target arm64-apple-ios15.0 \
                  -sdk $(xcrun --sdk iphoneos --show-sdk-path) \
                  -Xfrontend -serialize-debugging-options \
                  Sources/AppEntry.swift Sources/ContentView.swift \
                  -o MyApp.app/MyApp
           
-          # 3. Inject configuration details
+          # 3. Inject configuration details into your app
           cp Info.plist MyApp.app/
           
-          # 4. Pack the structural contents for AltStore
+          # 4. Pack the structural contents into a Payload folder for AltStore
           mkdir Payload
           cp -r MyApp.app Payload/
           zip -r MyApp.ipa Payload
 
-      - name: Upload App Asset
-        uses: actions/upload-artifact@v4
+      - name: Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
         with:
-          name: iPhoneApp
-          path: MyApp.ipa
+          files: MyApp.ipa
+          tag_name: v1.0
+          name: Release v1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
