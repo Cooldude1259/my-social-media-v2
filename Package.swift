@@ -5,9 +5,6 @@ import PackageDescription
 
 let package = Package(
     name: "First App",
-    dependencies: [
-    .package(url: "https://github.com/moreSwift/swift-cross-ui.git", from: "0.1.0")
-    ],
 
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
