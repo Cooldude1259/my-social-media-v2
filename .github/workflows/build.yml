@@ -16,7 +16,6 @@ jobs:
 
       - name: Compile Swift Package for iOS Device
         run: |
-          # Compiles using the runner's native, pre-installed Swift toolchain
           swift build \
             -c release \
             --triple arm64-apple-ios15.0 \
@@ -24,10 +23,9 @@ jobs:
 
       - name: Construct Final Signed IPA Structure
         run: |
-          # Build the mandatory core directory layout
           mkdir -p Payload/MySocialMedia.app
 
-          # Copy the compiled executable binary
+          # Copies the binary using your package platform definitions
           cp .build/arm64-apple-ios15.0/release/MySocialMedia Payload/MySocialMedia.app/MySocialMedia
           
           # Inject your universal iPadOS compatible Info.plist layout
