@@ -72,10 +72,10 @@ jobs:
           # AltStore requires the IPA size in bytes; recompute it for this build.
           SIZE=$(stat -f%z MySocialMedia.ipa)
 
-          # Bump the version + date + size in the first versions[] entry (modern AltStore/SideStore schema).
+          # Bump the version + date + size that AltStore compares against (flat AltStore schema).
           # downloadURL stays as ".../releases/latest/..." which auto-resolves to this release.
           jq --arg v "$VERSION" --arg d "$DATE" --argjson s "$SIZE" \
-             '.apps[0].versions[0].version = $v | .apps[0].versions[0].date = $d | .apps[0].versions[0].size = $s' apps.json > apps.tmp.json
+             '.apps[0].version = $v | .apps[0].versionDate = $d | .apps[0].size = $s' apps.json > apps.tmp.json
           mv apps.tmp.json apps.json
 
           git config user.name  "github-actions[bot]"
