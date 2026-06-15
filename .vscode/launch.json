@@ -19,6 +19,26 @@
             "target": "First App",
             "configuration": "release",
             "preLaunchTask": "swift: Build Release First App"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:First App}",
+            "name": "Debug MySocialMedia",
+            "target": "MySocialMedia",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug MySocialMedia"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:First App}",
+            "name": "Release MySocialMedia",
+            "target": "MySocialMedia",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release MySocialMedia"
         }
     ]
 }
