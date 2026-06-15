@@ -6,11 +6,11 @@
       "name": "MyFirstApp",
       "bundleIdentifier": "com.cooldude1259.myfirstapp",
       "developerName": "CoolDude1259",
-      "version": "1.0.23",
+      "version": "1.0.24",
       "versionDate": "2026-06-15",
       "versionDescription": "Initial SwiftUI release!",
       "downloadURL": "https://github.com/Cooldude1259/my-social-media-v2/releases/latest/download/MySocialMedia.ipa",
-      "size": 20660,
+      "size": 20662,
       "localizedDescription": "My awesome custom SwiftUI app built natively from Windows.",
       "iconURL": "https://raw.githubusercontent.com/Cooldude1259/my-social-media-v2/main/icon.png",
       "tintColor": "5CA9FB"
