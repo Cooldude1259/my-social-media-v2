@@ -11,11 +11,11 @@
       "tintColor": "5CA9FB",
       "versions": [
         {
-          "version": "1.0.22",
+          "version": "1.0.23",
           "date": "2026-06-15",
           "localizedDescription": "Initial SwiftUI release!",
           "downloadURL": "https://github.com/Cooldude1259/my-social-media-v2/releases/latest/download/MySocialMedia.ipa",
-          "size": 20659,
+          "size": 20660,
           "minOSVersion": "15.0"
         }
       ]
