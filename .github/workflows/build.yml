@@ -1,4 +1,4 @@
-name: Build iOS SwiftUI App
+name: Build iOS SwiftUI App from Package
 
 on:
   push:
@@ -10,13 +10,10 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-15
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
-      - name: Select Xcode Version
-        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
       - name: Compute Version Number
         id: version
@@ -28,37 +25,41 @@ jobs:
           echo "BUILD=${{ github.run_number }}" >> "$GITHUB_OUTPUT"
           echo "Building version $VERSION"
 
-      - name: Compile and Package SwiftUI App
+      - name: Compile Swift Package for iOS Device
+        run: |
+          swift build \
+            -c release \
+            --triple arm64-apple-ios15.0 \
+            --sdk $(xcrun --sdk iphoneos --show-sdk-path)
+
+      - name: Construct Final Signed IPA Structure
         run: |
           VERSION="${{ steps.version.outputs.VERSION }}"
           BUILD="${{ steps.version.outputs.BUILD }}"
 
-          # 1. Clean up any previous builds and create a fresh App Bundle structure
-          rm -rf MyApp.app Payload MyApp.ipa
-          mkdir -p MyApp.app
-
-          # 2. Compile your SwiftUI project files using the official iPhone SDK.
-          #    Output binary name (MyApp) must match CFBundleExecutable in Info.plist.
-          swiftc -target arm64-apple-ios15.0 \
-                 -sdk $(xcrun --sdk iphoneos --show-sdk-path) \
-                 -Xfrontend -serialize-debugging-options \
-                 Sources/AppEntry.swift Sources/ContentView.swift \
-                 -o MyApp.app/MyApp
-
-          # 3. Stamp the build version into Info.plist, then inject it into the app
+          # 1. Stamp this build's version into Info.plist (what AltStore compares against)
           /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" Info.plist
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" Info.plist
-          cp Info.plist MyApp.app/
 
-          # 4. Pack the structural contents into a Payload folder for AltStore
-          mkdir Payload
-          cp -r MyApp.app Payload/
-          zip -r MyApp.ipa Payload
+          # 2. Build the installation folder layout
+          mkdir -p Payload/MySocialMedia.app
+
+          # 3. Extract the cleanly compiled binary file from the standard release directory
+          cp .build/release/MySocialMedia Payload/MySocialMedia.app/MySocialMedia
+
+          # 4. Inject your universal iPadOS compatible Info.plist layout
+          cp Info.plist Payload/MySocialMedia.app/Info.plist
+
+          # 5. Ad-hoc code sign the bundle package to allow iPadOS execution
+          codesign --force --deep --sign - Payload/MySocialMedia.app
+
+          # 6. Compress into a deployable distribution asset file
+          zip -r MySocialMedia.ipa Payload
 
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
-          files: MyApp.ipa
+          files: MySocialMedia.ipa
           tag_name: v${{ steps.version.outputs.VERSION }}
           name: Release v${{ steps.version.outputs.VERSION }}
         env:

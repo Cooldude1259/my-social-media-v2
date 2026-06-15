@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleExecutable</key>
-    <string>MyApp</string>
+    <string>MySocialMedia</string>
     <key>CFBundleIdentifier</key>
     <string>com.cooldude1259.myfirstapp</string>
     <key>CFBundleName</key>
@@ -14,5 +14,10 @@
     <string>1</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
+    <key>UIDeviceFamily</key>
+    <array>
+        <integer>1</integer>
+        <integer>2</integer>
+    </array>
 </dict>
 </plist>
