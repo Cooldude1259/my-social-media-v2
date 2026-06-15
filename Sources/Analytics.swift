@@ -26,7 +26,7 @@ enum Analytics {
 
     /// Send a signal (event) to TelemetryDeck. Fire-and-forget; never blocks the UI.
     static func log(_ signalType: String, params: [String: Any] = [:]) {
-        guard appID != "119BD5B4-E900-4786-A2D1-DC9CCBFB5194", !appID.isEmpty else { return }
+        guard appID != "YOUR-TELEMETRYDECK-APP-ID", !appID.isEmpty else { return }
         guard let url = URL(string: "https://nom.telemetrydeck.com/v2/") else { return }
 
         // TelemetryDeck payload values are strings.
