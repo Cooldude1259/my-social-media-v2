@@ -1,51 +1,62 @@
-name: Build iOS SwiftUI App from Package
-
-on:
-  push:
-    branches: [ main ]
-
-permissions:
-  contents: write
-
-jobs:
-  build:
-    runs-on: macos-15
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Compile Swift Package for iOS
-        run: |
-          # 1. Compile the executable using native Swift flags for iOS
-          swift build \
-            -c release \
-            --triple arm64-apple-ios15.0 \
-            --sdk $(xcrun --sdk iphoneos --show-sdk-path)
-
-      - name: Construct Application Bundle
-        run: |
-          # 2. Build the precise directory path structure Apple requires
-          mkdir -p Payload/MySocialMedia.app
-
-          # 3. Locate and copy the release binary
-          cp .build/arm64-apple-ios15.0/release/MySocialMedia Payload/MySocialMedia.app/MySocialMedia
-
-          # 4. Inject your corrected Info.plist
-          cp Info.plist Payload/MySocialMedia.app/Info.plist
-
-      - name: Ad-Hoc Sign and Package IPA
-        run: |
-          # 5. Apply the ad-hoc signature to the complete bundle structure
-          codesign --force --deep --sign - Payload/MySocialMedia.app
-
-          # 6. Compress the Payload directory into a valid .ipa installer file
-          zip -r MySocialMedia.ipa Payload
-
-      - name: Publish to GitHub Releases
-        uses: softprops/action-gh-release@v2
-        with:
-          files: MySocialMedia.ipa
-          tag_name: v1.0
-          name: Release v1.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Swift - Build and Test
+  # You may pin to the exact commit or the version.
+  # uses: brightdigit/swift-build@4a7c5eca326125424d7de97901bb5af64c783296
+  uses: brightdigit/swift-build@v1.5.6
+  with:
+    # Directory containing the Swift package
+    working-directory: # optional, default is .
+    # The scheme to build and test (auto-calculated from the Swift package when omitted on Apple platforms)
+    scheme: # optional
+    # Build type (ios, watchos, visionos, tvos, macos, android, wasm, wasm-embedded)
+    type: # optional
+    # Xcode version path for Apple platforms
+    xcode: # optional
+    # Simulator device name for Apple platforms
+    deviceName: # optional
+    # Simulator OS version for Apple platforms
+    osVersion: # optional
+    # Whether to download the platform if not available
+    download-platform: # optional, default is false
+    # Swift version for Windows Swift toolchain installation
+    windows-swift-version: # optional
+    # Swift build identifier for Windows Swift toolchain installation
+    windows-swift-build: # optional
+    # Swift version for Android Swift SDK installation
+    android-swift-version: # optional
+    # Android API level for emulator testing
+    android-api-level: # optional
+    # Android NDK version for Swift Android builds
+    android-ndk-version: # optional
+    # Run tests on Android emulator (must be false on ARM macOS)
+    android-run-tests: # optional
+    # Additional Swift build flags for Android builds
+    android-swift-build-flags: # optional
+    # Additional Swift test flags for Android tests
+    android-swift-test-flags: # optional
+    # Android emulator boot timeout in seconds
+    android-emulator-boot-timeout: # optional
+    # Additional files to copy to emulator for testing
+    android-copy-files: # optional
+    # Cache the Android AVD emulator snapshot (skiptools/swift-android-action). Set to false to save Actions storage. Default: true
+    cache-avd: # optional, default is true
+    # Additional Swift compiler/linker flags for Wasm builds
+    wasm-swift-flags: # optional
+    # Optional: Use Wasmtime runtime fallback (specify specific version like "27.0.0"). Default: Uses WasmKit runtime (bundled with Swift 6.2.3+). Note: "latest" is no longer supported.
+    wasmtime-version: # optional, default is 
+    # Testing library detection mode for Wasm tests (auto, swift-testing, xctest, both, none). Default: auto (automatically detect)
+    wasm-testing-library: # optional, default is auto
+    # Additional flags passed to Wasm test runner (WasmKit/Wasmtime). Example: --parallel
+    wasm-swift-test-flags: # optional, default is 
+    # Enable xcbeautify for prettified xcodebuild output (Apple platforms only)
+    use-xcbeautify: # optional, default is false
+    # xcbeautify renderer for CI integration (default, github-actions, teamcity, azure-devops-pipelines)
+    xcbeautify-renderer: # optional, default is default
+    # xcbeautify version to install (e.g., 2.30.1, 2.29.0)
+    xcbeautify-version: # optional, default is 2.30.1
+    # Skip Package.resolved dependency pinning (allows floating dependency versions)
+    skip-package-resolved: # optional, default is false
+    # Build without running tests
+    build-only: # optional, default is false
+    # Save test output to runner temp directory for artifact upload. Useful for test validation workflows.
+    save-test-output: # optional, default is false
+          
