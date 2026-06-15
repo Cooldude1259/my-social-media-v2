@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-15
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -17,24 +17,31 @@ jobs:
       - name: Select Xcode Version
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
-      - name: Build Swift Package for iOS
+      - name: Build Swift Package for iOS Device
         run: |
-          # 1. Compile the executable using the native iPhoneOS SDK
+          # 1. Point -package to the current directory '.' instead of a string name
           xcodebuild build \
-            -package MySocialMedia \
+            -package . \
             -scheme MySocialMedia \
             -configuration Release \
+            -destination "generic/platform=iOS" \
             -sdk iphoneos \
             -derivedDataPath build_output \
             CODE_SIGNING_ALLOWED=NO
 
       - name: Construct Application Bundle and Info.plist
         run: |
-          # 2. Build the exact directory path structure Apple requires
+          # 2. Build the precise directory path structure Apple requires
           mkdir -p Payload/MySocialMedia.app
 
           # 3. Locate the compiled executable binary inside derived data and copy it
-          BINARY_PATH=$(find build_output -name "MySocialMedia" -type f | head -n 1)
+          BINARY_PATH=$(find build_output -name "MySocialMedia" -type f | grep -v "PackageProduct" | head -n 1)
+          
+          if [ -z "$BINARY_PATH" ]; then
+            echo "::error::Could not find compiled MySocialMedia binary in build_output!"
+            exit 1
+          fi
+          
           cp "$BINARY_PATH" Payload/MySocialMedia.app/MySocialMedia
 
           # 4. Inject your corrected Info.plist into the root bundle directory
@@ -46,12 +53,12 @@ jobs:
           codesign --force --deep --sign - Payload/MySocialMedia.app
 
           # 6. Compress the Payload directory into a valid .ipa installer file
-          zip -r MyApp.ipa Payload
+          zip -r MySocialMedia.ipa Payload
 
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
-          files: MyApp.ipa
+          files: MySocialMedia.ipa
           tag_name: v1.0
           name: Release v1.0
         env:
