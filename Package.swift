@@ -1,21 +1,19 @@
 // swift-tools-version:6.0
-// The swift-tools-version declares the minimum version of Swift required to build this package.
-
 import PackageDescription
 
 let package = Package(
-    name: "First App",
-
-    targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
-        .executableTarget(
-            name: "First App"
-        ),
-        .testTarget(
-            name: "First AppTests",
-            dependencies: ["First App"]
-        ),
+    name: "MySocialMedia",
+    platforms: [
+        .iOS(.v15) // This line forces SPM to understand SwiftUI availability requirements
     ],
-    swiftLanguageModes: [.v6]
+    products: [
+        .executable(name: "MySocialMedia", targets: ["MySocialMedia"])
+    ],
+    targets: [
+        .executableTarget(
+            name: "MySocialMedia",
+            dependencies: [],
+            path: "Sources"
+        )
+    ]
 )
