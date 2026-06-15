@@ -23,18 +23,19 @@ jobs:
 
       - name: Construct Final Signed IPA Structure
         run: |
+          # 1. Build the installation folder layout
           mkdir -p Payload/MySocialMedia.app
 
-          # Copies the binary using your package platform definitions
-          cp .build/arm64-apple-ios15.0/release/MySocialMedia Payload/MySocialMedia.app/MySocialMedia
+          # 2. Extract the cleanly compiled binary file from the standard release directory
+          cp .build/release/MySocialMedia Payload/MySocialMedia.app/MySocialMedia
           
-          # Inject your universal iPadOS compatible Info.plist layout
+          # 3. Inject your universal iPadOS compatible Info.plist layout
           cp Info.plist Payload/MySocialMedia.app/Info.plist
 
-          # Apply ad-hoc signature so it executes on your device
+          # 4. Ad-hoc code sign the bundle package to allow iPadOS execution
           codesign --force --deep --sign - Payload/MySocialMedia.app
           
-          # Package into the final distribution installer asset
+          # 5. Compress into a deployable distribution asset file
           zip -r MySocialMedia.ipa Payload
 
       - name: Publish to GitHub Releases
