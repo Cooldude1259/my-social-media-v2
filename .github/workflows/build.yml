@@ -4,7 +4,6 @@ on:
   push:
     branches: [ main ]
 
-# Grants permissions to create a GitHub Release and upload the .ipa installer file
 permissions:
   contents: write
 
@@ -18,30 +17,42 @@ jobs:
       - name: Select Xcode Version
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
-      - name: Compile, Sign, and Package SwiftUI App
+      - name: Create Export Options Plist
         run: |
-          # 1. Clean up old structures
-          rm -rf MyApp.app Payload MyApp.ipa
-          mkdir -p MyApp.app
-          
-          # 2. Compile your SwiftUI app files
-          swiftc -target arm64-apple-ios15.0 \
-                 -sdk $(xcrun --sdk iphoneos --show-sdk-path) \
-                 -Xfrontend -serialize-debugging-options \
-                 Sources/AppEntry.swift Sources/ContentView.swift \
-                 -o MyApp.app/MySocialMedia
-          
-          # 3. Inject configuration details
-          cp Info.plist MyApp.app/
-          
-          # 4. THIS IS THE FIXED STEP: Forces an ad-hoc signature onto the binary so LiveContainer can map it
-          codesign --force --deep --sign - MyApp.app/MySocialMedia
-          
-          # 5. Pack the structural contents into a Payload folder for AltStore/LiveContainer
-          mkdir Payload
-          cp -r MyApp.app Payload/
-          zip -r MyApp.ipa Payload
+          cat <<EOF > ExportOptions.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://apple.com">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>ad-hoc</string>
+              <key>compileBitcode</key>
+              <false/>
+              <key>thinning</key>
+              <string>&lt;none&gt;</string>
+          </dict>
+          </plist>
+          EOF
 
+      - name: Archive and Export IPA
+        run: |
+          # 1. Clean and generate an official .xcarchive pack
+          xcodebuild archive \
+            -scheme MySocialMedia \
+            -archivePath build/MySocialMedia.xcarchive \
+            -sdk iphoneos \
+            -configuration Release \
+            CODE_SIGNING_ALLOWED=NO
+
+          # 2. Safely extract and format the official Payload environment
+          mkdir -p Payload
+          cp -r build/MySocialMedia.xcarchive/Products/Applications/*.app Payload/
+
+          # 3. Apply the ad-hoc signature to the complete bundle structure
+          codesign --force --deep --sign - Payload/*.app
+
+          # 4. Compres into a deployment-ready installer file
+          zip -r MyApp.ipa Payload
 
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v2
