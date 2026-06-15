@@ -9,10 +9,15 @@ let package = Package(
     products: [
         .executable(name: "MySocialMedia", targets: ["MySocialMedia"])
     ],
+    dependencies: [
+        .package(url: "https://github.com/supabase/supabase-swift.git", from: "2.0.0")
+    ],
     targets: [
         .executableTarget(
             name: "MySocialMedia",
-            dependencies: [],
+            dependencies: [
+                .product(name: "Supabase", package: "supabase-swift")
+            ],
             path: "Sources"
         )
     ]

@@ -17,6 +17,7 @@ struct ContentView: View {
             
             Button(action: {
                 count += 1
+                Analytics.log("button_tap", params: ["count": count])
             }) {
                 Text("Tap Me")
                     .fontWeight(.semibold)
