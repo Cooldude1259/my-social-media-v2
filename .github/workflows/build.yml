@@ -14,14 +14,9 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Swift Toolchain
-        uses: swift-actions/setup-swift@v2
-        with:
-          # Pulls the active developmental snapshot matching your tools requirement
-          swift-version: "nightly-6.3"
-
       - name: Compile Swift Package for iOS Device
         run: |
+          # Compiles using the runner's native, pre-installed Swift toolchain
           swift build \
             -c release \
             --triple arm64-apple-ios15.0 \
@@ -29,13 +24,19 @@ jobs:
 
       - name: Construct Final Signed IPA Structure
         run: |
+          # Build the mandatory core directory layout
           mkdir -p Payload/MySocialMedia.app
 
-          # Copies the binary compiled with the active 6.3 snapshot
+          # Copy the compiled executable binary
           cp .build/arm64-apple-ios15.0/release/MySocialMedia Payload/MySocialMedia.app/MySocialMedia
+          
+          # Inject your universal iPadOS compatible Info.plist layout
           cp Info.plist Payload/MySocialMedia.app/Info.plist
 
+          # Apply ad-hoc signature so it executes on your device
           codesign --force --deep --sign - Payload/MySocialMedia.app
+          
+          # Package into the final distribution installer asset
           zip -r MySocialMedia.ipa Payload
 
       - name: Publish to GitHub Releases
