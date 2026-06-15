@@ -14,5 +14,7 @@
     <string>1</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
+    <key>UIDeviceFamily</key>
+    <string>2</string>
 </dict>
 </plist>
