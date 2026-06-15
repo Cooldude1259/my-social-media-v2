@@ -1,4 +1,4 @@
-name: Build iOS SwiftUI App
+name: Build iOS SwiftUI App from Package
 
 on:
   push:
@@ -17,41 +17,35 @@ jobs:
       - name: Select Xcode Version
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
-      - name: Create Export Options Plist
+      - name: Build Swift Package for iOS
         run: |
-          cat <<EOF > ExportOptions.plist
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://apple.com">
-          <plist version="1.0">
-          <dict>
-              <key>method</key>
-              <string>ad-hoc</string>
-              <key>compileBitcode</key>
-              <false/>
-              <key>thinning</key>
-              <string>&lt;none&gt;</string>
-          </dict>
-          </plist>
-          EOF
-
-      - name: Archive and Export IPA
-        run: |
-          # 1. Clean and generate an official .xcarchive pack
-          xcodebuild archive \
+          # 1. Compile the executable using the native iPhoneOS SDK
+          xcodebuild build \
+            -package MySocialMedia \
             -scheme MySocialMedia \
-            -archivePath build/MySocialMedia.xcarchive \
-            -sdk iphoneos \
             -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build_output \
             CODE_SIGNING_ALLOWED=NO
 
-          # 2. Safely extract and format the official Payload environment
-          mkdir -p Payload
-          cp -r build/MySocialMedia.xcarchive/Products/Applications/*.app Payload/
+      - name: Construct Application Bundle and Info.plist
+        run: |
+          # 2. Build the exact directory path structure Apple requires
+          mkdir -p Payload/MySocialMedia.app
 
-          # 3. Apply the ad-hoc signature to the complete bundle structure
-          codesign --force --deep --sign - Payload/*.app
+          # 3. Locate the compiled executable binary inside derived data and copy it
+          BINARY_PATH=$(find build_output -name "MySocialMedia" -type f | head -n 1)
+          cp "$BINARY_PATH" Payload/MySocialMedia.app/MySocialMedia
 
-          # 4. Compres into a deployment-ready installer file
+          # 4. Inject your corrected Info.plist into the root bundle directory
+          cp Info.plist Payload/MySocialMedia.app/Info.plist
+
+      - name: Ad-Hoc Sign and Package IPA
+        run: |
+          # 5. Apply the ad-hoc signature to the complete bundle structure
+          codesign --force --deep --sign - Payload/MySocialMedia.app
+
+          # 6. Compress the Payload directory into a valid .ipa installer file
           zip -r MyApp.ipa Payload
 
       - name: Publish to GitHub Releases
