@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://apple.com">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
     <key>CFBundleExecutable</key>
-    <string>MySocialMedia</string>
+    <string>MyApp</string>
     <key>CFBundleIdentifier</key>
-    <string>com.cooldude1259.mysocialmedia</string>
+    <string>com.cooldude1259.myfirstapp</string>
     <key>CFBundleName</key>
-    <string>MySocialMedia</string>
+    <string>MyFirstApp</string>
     <key>CFBundleShortVersionString</key>
     <string>1.0</string>
     <key>CFBundleVersion</key>

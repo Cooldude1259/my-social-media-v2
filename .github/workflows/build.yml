@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
 
-# Grants permissions to create a GitHub Release and upload the .ipa installer file
+# Grants permissions to create a GitHub Release, upload the .ipa, and commit the updated apps.json
 permissions:
   contents: write
 
@@ -18,22 +18,38 @@ jobs:
       - name: Select Xcode Version
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
+      - name: Compute Version Number
+        id: version
+        run: |
+          # Auto-incrementing version. github.run_number goes up by 1 every workflow run,
+          # so AltStore/LiveContainer always see a higher number and offer an update.
+          VERSION="1.0.${{ github.run_number }}"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "BUILD=${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          echo "Building version $VERSION"
+
       - name: Compile and Package SwiftUI App
         run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          BUILD="${{ steps.version.outputs.BUILD }}"
+
           # 1. Clean up any previous builds and create a fresh App Bundle structure
           rm -rf MyApp.app Payload MyApp.ipa
           mkdir -p MyApp.app
-          
-          # 2. Compile your SwiftUI project files using the official iPhone SDK
+
+          # 2. Compile your SwiftUI project files using the official iPhone SDK.
+          #    Output binary name (MyApp) must match CFBundleExecutable in Info.plist.
           swiftc -target arm64-apple-ios15.0 \
                  -sdk $(xcrun --sdk iphoneos --show-sdk-path) \
                  -Xfrontend -serialize-debugging-options \
                  Sources/AppEntry.swift Sources/ContentView.swift \
                  -o MyApp.app/MyApp
-          
-          # 3. Inject configuration details into your app
+
+          # 3. Stamp the build version into Info.plist, then inject it into the app
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" Info.plist
           cp Info.plist MyApp.app/
-          
+
           # 4. Pack the structural contents into a Payload folder for AltStore
           mkdir Payload
           cp -r MyApp.app Payload/
@@ -43,7 +59,25 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: MyApp.ipa
-          tag_name: v1.0
-          name: Release v1.0
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          name: Release v${{ steps.version.outputs.VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update AltStore Source (apps.json)
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          DATE=$(date +%Y-%m-%d)
+
+          # Bump the version + date that AltStore/LiveContainer compare against.
+          # downloadURL stays as ".../releases/latest/..." which auto-resolves to this release.
+          jq --arg v "$VERSION" --arg d "$DATE" \
+             '.apps[0].version = $v | .apps[0].versionDate = $d' apps.json > apps.tmp.json
+          mv apps.tmp.json apps.json
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add apps.json
+          # "[skip ci]" stops this commit from triggering another build (no infinite loop)
+          git commit -m "Release v$VERSION [skip ci]" || echo "No changes to commit"
+          git push
