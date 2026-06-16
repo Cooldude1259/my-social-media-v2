@@ -4,16 +4,11 @@ import Supabase
 struct ContentView: View {
     @State private var count = 0
 
-    let supabase = SupabaseClient(
-        supabaseURL: URL(string: "https://bmfbnydcanksjwquljzb.supabase.co")!,
-        supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtZmJueWRjYW5rc2p3cXVsanpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3MzA0MjksImV4cCI6MjA4MjMwNjQyOX0.d7sVVng0ZVOzE-yLXjMhiKr7cUodIP9C8v4zoVQxZHo"
-    )
-
     func signInWithGitHub() async {
         do {
             try await supabase.auth.signInWithOAuth(provider: .github)
         } catch {
-            print("Sign-in failed: /(error)")
+            print("Sign-in failed: \(error)")
         }
     }
 
@@ -21,7 +16,7 @@ struct ContentView: View {
         do {
             try await supabase.auth.signInWithOAuth(provider: .google)
         } catch {
-            print("Sign-in failed: /(error)")
+            print("Sign-in failed: \(error)")
         }
     }
 
