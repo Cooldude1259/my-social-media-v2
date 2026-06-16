@@ -1,7 +1,13 @@
 import SwiftUI
+import Supabase
 
 struct ContentView: View {
     @State private var count = 0
+
+    let supabase = SupabaseClient(
+        supabaseURL: URL(string: "https://bmfbnydcanksjwquljzb.supabase.co")!,
+        supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtZmJueWRjYW5rc2p3cXVsanpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3MzA0MjksImV4cCI6MjA4MjMwNjQyOX0.d7sVVng0ZVOzE-yLXjMhiKr7cUodIP9C8v4zoVQxZHo"
+    )
 
     func signInWithGitHub() async {
         do {
