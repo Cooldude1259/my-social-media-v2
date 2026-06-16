@@ -6,7 +6,10 @@ struct ContentView: View {
 
     func signInWithGitHub() async {
         do {
-            try await supabase.auth.signInWithOAuth(provider: .github)
+            try await supabase.auth.signInWithOAuth(
+                provider: .github,
+                redirectTo: URL(string: "connected://login-callback")
+            )
         } catch {
             print("Sign-in failed: \(error)")
         }
@@ -14,7 +17,10 @@ struct ContentView: View {
 
     func signInWithGoogle() async {
         do {
-            try await supabase.auth.signInWithOAuth(provider: .google)
+            try await supabase.auth.signInWithOAuth(
+                provider: .google,
+                redirectTo: URL(string: "connected://login-callback")
+            )
         } catch {
             print("Sign-in failed: \(error)")
         }
