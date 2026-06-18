@@ -50,10 +50,18 @@ jobs:
           # 4. Inject your universal iPadOS compatible Info.plist layout
           cp Info.plist Payload/MySocialMedia.app/Info.plist
 
-          # 5. Ad-hoc code sign the bundle package to allow iPadOS execution
+          # 5. Generate home-screen app icons from icon.png (sips ships with macOS).
+          #    iOS resolves "AppIcon60x60" to the @2x/@3x files at the matching scale.
+          APP=Payload/MySocialMedia.app
+          sips -z 120 120 icon.png --out "$APP/AppIcon60x60@2x.png"
+          sips -z 180 180 icon.png --out "$APP/AppIcon60x60@3x.png"
+          sips -z 152 152 icon.png --out "$APP/AppIcon76x76@2x.png"
+          sips -z 167 167 icon.png --out "$APP/AppIcon83.5x83.5@2x.png"
+
+          # 6. Ad-hoc code sign the bundle package to allow iPadOS execution
           codesign --force --deep --sign - Payload/MySocialMedia.app
 
-          # 6. Compress into a deployable distribution asset file
+          # 7. Compress into a deployable distribution asset file
           zip -r MySocialMedia.ipa Payload
 
       - name: Publish to GitHub Releases
