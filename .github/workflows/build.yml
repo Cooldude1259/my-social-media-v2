@@ -32,7 +32,7 @@ jobs:
             --triple arm64-apple-ios15.0 \
             --sdk $(xcrun --sdk iphoneos --show-sdk-path)
 
-      - name: Construct Final Signed IPA Structure
+      - name: Construct Final IPA Structure
         run: |
           VERSION="${{ steps.version.outputs.VERSION }}"
           BUILD="${{ steps.version.outputs.BUILD }}"
@@ -58,8 +58,15 @@ jobs:
           sips -z 152 152 icon.png --out "$APP/AppIcon76x76@2x.png"
           sips -z 167 167 icon.png --out "$APP/AppIcon83.5x83.5@2x.png"
 
-          # 6. Ad-hoc code sign the bundle package to allow iPadOS execution
-          codesign --force --deep --sign - Payload/MySocialMedia.app
+          # 6. Intentionally NOT code-signing here.
+          #    Sideloading tools (Install on Air, AltStore, Sideloadly) re-sign the
+          #    bundle themselves with your own Apple ID cert at install time, and they
+          #    expect a genuinely unsigned bundle as input. The previous step here used
+          #    `codesign --sign -` (ad-hoc signing), which attaches a signature with no
+          #    certificate chain behind it — that's what produced the
+          #    "integrity could not be verified" error, since ad-hoc signatures don't
+          #    satisfy a normal on-device install and can also interfere with the
+          #    sideload tool's own re-signing pass.
 
           # 7. Compress into a deployable distribution asset file
           zip -r MySocialMedia.ipa Payload
